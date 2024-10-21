@@ -1,0 +1,22 @@
+{
+  "name": "astar.flame",
+  "version": "0.0.1",
+  "displayName": "AStar Flame",
+  "description": "Flame",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.burst": "1.8.18",
+    "com.unity.mathematics": "1.3.2"
+  },
+  "keywords": [
+    "Linear Blend Skinning",
+    "GPU Skinning",
+    "Job Skinning"
+  ],
+  "author": {
+    "name": "AStar",
+    "email": "sxw59941513@163.com",
+    "url": "https://astar.zone"
+  },
+  "hideInEditor": false
+}
