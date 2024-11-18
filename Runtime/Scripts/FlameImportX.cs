@@ -7,6 +7,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering;
 
 namespace AStar.Flame
 {
@@ -178,9 +179,8 @@ namespace AStar.Flame
             Assert.IsNotNull(smr.transform.parent);
             Assert.AreEqual(tree.Count(parent => parent >= joints.Length || parent < 0), 1, "Invalid root count");
             Transform[] transforms = new Transform[joints.Length];
-            string[] names = { "Root", "Neck", "Jaw", "RightEye", "LeftEye" };
             for (int i = 0, end = transforms.Length; i < end; i++)
-                transforms[i] = new GameObject(names[i]).transform;
+                transforms[i] = new GameObject(Constants.Bone.Name.ARRAY[i]).transform;
             for (int i = 0, end = tree.Length; i < end; i++)
             {
                 int parent = tree[i];
@@ -225,15 +225,36 @@ namespace AStar.Flame
         {
             int shapeCount = additive.ShapeWeights.Length;
             Mesh mesh = new Mesh();
+            mesh.indexFormat = IndexFormat.UInt32;
             mesh.SetVertices(flame.VTemplate);
             mesh.SetIndices(flame.Faces.Data, MeshTopology.Triangles, 0);
             AddBlendShapes(mesh, flame.ShapeDirs, 0, shapeCount, iter => $"Shape {iter}");
             mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.RecalculateBounds();
             return mesh;
         }
 
-        private static void ApplyFlame(SkinnedMeshRenderer smr, FlameData flame, FlameAdditiveData additive)
+        [Serializable]
+        public struct CreateConfig
         {
+            public GameObject AttachGo;
+            public string FlameBaseJson;
+            public string FlameAdditiveJson;
+            public IndexFormat IndexFormat;
+            public bool GenerateNormal;
+            public bool GenerateTangent;
+        }
+
+        public static SkinnedMeshRenderer CreateFlameHead(CreateConfig config)
+        {
+            // create smr
+            using var flame = new FlameData(JsonUtility.FromJson<JsonData>(config.FlameBaseJson));
+            using var additive = new FlameAdditiveData(JsonUtility.FromJson<JsonData>(config.FlameAdditiveJson));
+            var go = new GameObject("Mesh");
+            go.transform.SetParent(config.AttachGo.transform);
+            var smr = go.AddComponent<SkinnedMeshRenderer>();
+            
             Mesh baseMesh = CreateBaseMesh(flame, additive);
             smr.sharedMesh = baseMesh;
             ApplyAdditiveToSmr(additive, smr);
@@ -253,16 +274,7 @@ namespace AStar.Flame
 
             for (int i = 0; i < baked.blendShapeCount; i++)
                 smr.SetBlendShapeWeight(i, 0.0f);
-        }
-
-        public static SkinnedMeshRenderer CreateFlameHead(GameObject attach, string flameJson, string additiveJson)
-        {
-            using var flame = new FlameData(JsonUtility.FromJson<JsonData>(flameJson));
-            using var additive = new FlameAdditiveData(JsonUtility.FromJson<JsonData>(additiveJson));
-            var go = new GameObject("Mesh");
-            go.transform.SetParent(attach.transform);
-            var smr = go.AddComponent<SkinnedMeshRenderer>();
-            ApplyFlame(smr, flame, additive);
+            
             return smr;
         }
     }

@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 namespace AStar.Flame
 {
-    public class FlameCreator : MonoBehaviour
+    public partial class FlameCreator : MonoBehaviour
     {
         [SerializeField] private TextAsset m_FlameData;
         [SerializeField] private TextAsset m_AdditiveFlameData;
@@ -15,13 +15,29 @@ namespace AStar.Flame
         {
             Assert.IsNotNull(m_FlameData);
             Assert.IsNotNull(m_AdditiveFlameData);
+
             var go = new GameObject(m_AdditiveFlameData.name);
             go.transform.SetParent(transform);
-            var smr = FlameImportX.CreateFlameHead(go, m_FlameData.text, m_AdditiveFlameData.text);
-            smr.material = m_Material == null
-                ? GraphicsSettings.currentRenderPipeline.defaultMaterial
-                : m_Material;
+
+            var smr = FlameImportX.CreateFlameHead(GetImporterConfig(go));
+
+            var material = m_Material;
+            if (material == null) material = GraphicsSettings.currentRenderPipeline.defaultMaterial;
+            smr.material = material;
+
             smr.gameObject.AddComponent<FlameSmrAttachment>();
+
+            #if UNITY_EDITOR
+            ExportFbx(go);
+            go.Destroy();
+            #endif
         }
+
+        private FlameImportX.CreateConfig GetImporterConfig(GameObject attach) => new FlameImportX.CreateConfig
+        {
+            AttachGo = attach,
+            FlameBaseJson = m_FlameData.text,
+            FlameAdditiveJson = m_AdditiveFlameData.text,
+        };
     }
 }

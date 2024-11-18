@@ -6,7 +6,8 @@
   "unity": "2022.3",
   "dependencies": {
     "com.unity.burst": "1.8.18",
-    "com.unity.mathematics": "1.3.2"
+    "com.unity.mathematics": "1.3.2",
+    "com.unity.formats.fbx": "5.1.2"
   },
   "keywords": [
     "Linear Blend Skinning",
