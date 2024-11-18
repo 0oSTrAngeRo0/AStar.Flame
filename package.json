@@ -19,5 +19,12 @@
     "email": "sxw59941513@163.com",
     "url": "https://astar.zone"
   },
+  "samples": [
+    {
+      "displayName": "Useful Data",
+      "description": "Contains different versions of flame and a shader used to view bone weights.",
+      "path": "Samples~"
+    }
+  ],
   "hideInEditor": false
 }
